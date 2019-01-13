@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" manifest="gadget_vote.appcache">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vote Gadget</title>
+
+    <link rel="stylesheet" href="lib/material_design_lite.1.3.0.min.css" />
+    <link rel="stylesheet" href="gadget_vote.min.css" />
+
+    <script src="lib/material_design_lite.1.3.0.min.js"></script>
+
+    <script id="result_list_template" type="text/x-supplant">
+      <li class="mdl-list__item mdl-list__item--two-line">
+        <span class="mdl-list__item-primary-content">
+          <i class="material-icons mdl-list__item-avatar vote-list-icon">place</i>
+          <span class="vote-result-item-title">{nom}</span>
+          <span class="vote-result-item-adress mdl-list__item-sub-title">{adresse}</span>
+        </span>
+        <span class="mdl-list__item-secondary-content">
+          <form class="vote-result-details" name="vote-result-details">
+            <input type="hidden" name="record_id" value="{id}" />
+            <button type="submit" class="mdl-button mdl-js-button mdl-button--icon vote-result-details-submit"><i class="material-icons">play_arrow</i></button>
+          </form>
+        </span>
+      </li>
+    </script>
+
+    <script id="result_detail_template" type="text/x-supplant">
+      <div class="mdl-card vote-card-dialog">
+        <div class="mdl-card__title">
+          <h2 class="mdl-card__title-text vote-card-title" data-i18n="Contact Information">Contact Information</h2>
+        </div>
+        <div class="mdl-card__supporting-text">
+          <ul class="vote-card-list mdl-list">
+            <li class="mdl-list__item mdl-list__item--two-line">
+              <span class="mdl-list__item-primary-content">
+                <i class="material-icons mdl-list__item-avatar vote-list-icon">location_city</i>
+                <span class="mdl-list__item-secondary-info vote-card-mini-text" data-i18n="Name">Name</span>
+                <span class="vote-card-text">{name}</span>
+              </span>
+            </li>
+            <li class="mdl-list__item mdl-list__item--two-line">
+              <span class="mdl-list__item-primary-content">
+                <i class="material-icons mdl-list__item-avatar vote-list-icon">location_on</i>
+                <span class="mdl-list__item-secondary-info vote-card-mini-text" data-i18n="Adress">Adresse</span>
+                <span class="vote-card-text">{adresse}</span>
+              </span>
+            </li>
+          </ul>
+          <ul class="vote-card-list mdl-list">
+            <li class="mdl-list__item mdl-list__item--two-line">
+              <span class="mdl-list__item-primary-content">
+                <i class="material-icons mdl-list__item-avatar vote-list-icon">email</i>
+                <span class="mdl-list__item-secondary-info vote-card-mini-text" data-i18n="Email">Email</span>
+                <span class="vote-card-text">{mail}</span>
+              </span>
+            </li>
+            <li class="mdl-list__item mdl-list__item--two-line">
+              <span class="mdl-list__item-primary-content">
+                <i class="material-icons mdl-list__item-avatar vote-list-icon">tv</i>
+                <span class="mdl-list__item-secondary-info vote-card-mini-text" data-i18n="Website">Web</span>
+                <span class="vote-card-text">{site}</span>
+              </span>
+            </li>
+            <li class="mdl-list__item mdl-list__item--two-line">
+              <span class="mdl-list__item-primary-content">
+                <i class="material-icons mdl-list__item-avatar vote-list-icon">phone</i>
+                <span class="mdl-list__item-secondary-info vote-card-mini-text" data-i18n="Phone">Phone</span>
+                <span class="vote-card-text">{tel}</span>
+              </span>
+            </li>
+            <li class="mdl-list__item mdl-list__item--two-line">
+              <span class="mdl-list__item-primary-content">
+                <i class="material-icons mdl-list__item-avatar vote-list-icon">print</i>
+                <span class="mdl-list__item-secondary-info vote-card-mini-text" data-i18n="Fax">Fax</span>
+                <span class="vote-card-text">{fax}</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+        <div class="mdl-card__actions mdl-card--border">
+          <form name="volt-store-location">
+            <input type="hidden" name="vote_location" value="{name},{adresse}" />
+            <button type="submit" class="mdl-button vote-dialog-store" data-i18n="Store location">Store location</button>
+          </form>
+        </div>
+        </form>
+        <div class="mdl-card__menu">
+          <form name="vote-dialog-close" class="vote-dialog-action-form vote-dialog-close-form vote-dialog-close-top">
+            <button type="submit" class="mdl-button vote-dialog-close"><i class="material-icons">close</i></button>
+          </form>
+        </div>
+      </div>
+    </script>
+    
+    <script src="rsvp.latest.min.js"></script>
+    <script src="renderjs.latest.min.js"></script>
+    <script src="jio.latest.min.js"></script>
+    <script src="gadget_global.min.js"></script>
+    <script src="gadget_vote.js"></script>
+
+  </head>
+  <body>
+    <div class="mdl-dialog vote-dialog">
+      <div class="mdl-dialog__content vote-dialog-content"></div>
+    </div>
+
+    <div class="vote-layout mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="vote-header mdl-layout__header">
+        <div class="mdl-layout__header-row">
+          <a href="https://www.votefrance.eu" class="vote-home-button" title="https://www.votefrance.eu">
+            <span class="vote-home-button-text" data-i18n="Vote in France">Vote in France</span>
+          </a>
+          <h2 class="vote-site-header"><span data-i18n="The step by step guide">The step by step guide</span>&nbsp;<span class="vote-site-header-appendix" data-i18n="for EU citizens">for EU citizens</span> </h2>
+          <div class="mdl-layout-spacer"></div>
+          <!--button class="vote-homescreen-flag mdl-button mdl-js-button mdl-button--icon">
+            <i class="material-icons">add_to_homescreen</i>
+          </button-->
+          <!--form name="frube-open-menu-->
+          <button id="vote-open-menu" class="vote-header-button mdl-button mdl-js-button mdl-button--icon">
+            <i class="material-icons">language</i>
+          </button>
+          <!--/form-->
+          <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu vote-language-menu" for="vote-open-menu">
+            <li class="mdl-menu__item mdl-menu__item--full-bleed-divider vote-custom-menu-action">
+              <i class="vote-lang vote-lang_en"></i>
+              <form name="vote-select-language" class="vote-select-language">
+                <input type="hidden" name="vote_language" value="en" />
+                <button type="submit" class="mdl-button mdl-js-button" data-i18n="English">English</button>
+              </form>
+            </li>
+            <li class="mdl-menu__item mdl-menu__item--full-bleed-divider vote-custom-menu-action ">
+              <i class="vote-lang vote-lang_fr"></i>
+              <form name="vote-select-language" class="vote-select-language">
+                <input type="hidden" name="vote_language" value="fr" />
+                <button type="submit" class="mdl-button mdl-js-button" data-i18n="French">French</button>
+              </form>
+            </li>
+            <li class="mdl-menu__item mdl-menu__item--full-bleed-divider vote-custom-menu-action">
+              <i class="vote-lang vote-lang_de"></i>
+              <form name="vote-select-language" class="vote-select-language">
+                <input type="hidden" name="vote_language" value="de" />
+                <button type="submit" class="mdl-button mdl-js-button" data-i18n="German">German</button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </header>
+      <main class="vote-page-content mdl-layout__content">
+        <div class="vote-background">
+          <img class="vote-logo" src="img/vote_france_256x256-min.png" alt="Vote in France" />
+          
+          <div class="vote-content-timer-wrapper">
+            <span class="vote-content-timer-title" data-i18n="Time left to register">Time left to register:</span>
+            <span class="vote-content-timer">
+              <span class="days"></span>&nbsp;<span class="vote-timer-large" data-i18n="days">days</span><span class="vote-timer-small" data-i18n="mini-days">d</span>
+              <span class="hours"></span>&nbsp;<span class="vote-timer-large" data-i18n="hours">hours</span><span class="vote-timer-small" data-i18n="mini-hours">h</span>
+              <span Class="minutes"></span>&nbsp;<span class="vote-timer-large" data-i18n="minutes">minutes</span><span class="vote-timer-small" data-i18n="mini-minutes">m</span>
+              <span class="seconds"></span>&nbsp;<span class="vote-timer-large" data-i18n="seconds">seconds</span><span class="vote-timer-small" data-i18n="mini-seconds">s</span>
+            </span>    
+            <div class="vote-alarm">
+              <form name="vote-remind-week" class="">
+                <button type="submit" class="vote-submit-button"><i class="material-icons">alarm</i></button>
+              </form>
+            </div>
+          </div>
+
+        </div>
+        <div class="vote-content-intro-wrapper">
+          <div class="vote-content-intro">
+            <h1 class="vote-content-header" data-i18n="EU citizen living in France?">EU citizen living in France?</h1>
+            <p class="vote-content-subheader" data-i18n="The freedom to move and live anywhere">The freedom to move and live anywhere in Europe should not be taken for granted. Please participate in the upcoming European and municipal elections. This guide will show you how.</p>
+          </div>
+        </div>
+        <div class="vote-content-section">
+
+          <div class="vote-card mdl-card mdl-shadow--2dp">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text" data-i18n="1. Can I vote?">1. Can I vote?</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <p class="vote-card-text" data-i18n="To vote in the European elections, you must:">To vote in the European elections, you must:</p>
+              <ul>
+                <li class="vote-card-text" data-i18n="be at least 18 years of age">be at least 18 years of age</li>
+                <li class="vote-card-text" data-i18n="live in France">live in France</li>
+                <li class="vote-card-text" data-i18n="be an EU citizen">be an EU citizen</li>
+                <li class="vote-card-text" data-i18n="have full civil and political rights.">have full civil and political rights.</li>
+              </ul>
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <a href="https://europa.eu/youreurope/citizens/residence/elections-abroad/european-elections/france/index_en.htm" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" data-i18n="More info">More info</a>
+            </div>
+          </div>
+        
+          <div class="vote-card mdl-card mdl-shadow--2dp">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text" data-i18n="2. Until when can I register?">2. Until when can I register?</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <p class="vote-card-text"><span data-i18n="Registration is possible until">Registration is possible until</span>&nbsp;<span class="vote-deadline" data-i18n="March 31st, 2019">March 31st, 2019</span>.&nbsp;<span data-i18n="Create a reminder (ics file) by using the form below.">Create a reminder (ics file) by using the form below.</span></p>
+              <form name="vote_remind">
+                <div class="mdl-textfield mdl-js-textfield">
+                  <input class="mdl-textfield__input" name="vote_remind_title" type="text" id="vote_remind_title">
+                  <label class="mdl-textfield__label" for="vote_remind_title" data-i18n="Title">Title</label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                  <input class="mdl-textfield__input" name="vote_remind_date" required max="2019-03-31" type="date" pattern="\d{1,2}/\d{1,2}/\d{4}" id="vote_remind_date">
+                  <label class="mdl-textfield__label vote-override-label" for="vote_remind_date">Date</label>
+                  <span class="mdl-textfield__error" data-i18n="Invalid input, latest date is 31.03.2019!">Invalid input, latest date is 31.03.2019!</span>
+                </div>
+                <div class="vote-checkbox-wrapper">
+                  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="vote_remind_location">
+                    <input type="checkbox" name="vote_remind_location" id="vote_remind_location" class="mdl-checkbox__input">
+                    <span class="mdl-checkbox__label" data-i18n="Include stored Mairie (select and store below)">Include stored Mairie (select and store below)</span>
+                  </label>
+                </div>
+                 <button type="submit" class="vote-submit-button mdl-button mdl-js-button mdl-button--raised" data-i18n="Create reminder">Create reminder</button>
+              </form>
+              <form name="vote-remind-week" class="vote-submit-option">
+                <button type="submit" class="vote-submit-button mdl-button mdl-js-button mdl-button--raised" data-i18n="1 week reminder">1 week reminder</button>
+              </form>
+            </div>
+          </div>  
+
+          <div class="vote-card mdl-card mdl-shadow--2dp">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text" data-i18n="3. Which documents do I need?">3. Which documents do I need?</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <p class="vote-card-text" data-i18n="In order to vote you need to be registered">In order to vote you need to be registered in your local election list. To do so, the following documents are required:</p>
+              <ol class="vote-numbered-list">
+                <li class="vote-numbered-list-item"><span class="vote-card-text" data-i18n="Municipal Elections:">Municipal Elections:</span>&nbsp;<a class="vote-card-link" target="_blank" href="https://www.formulaires.modernisation.gouv.fr/gf/cerfa_12670.do" title="French Government Forms - Cerfa 12670-02 Municipal Election">Cerfa 12670-02</a> <span class="vote-card-text" data-i18n="(see">(see</span>&nbsp;<a class="vote-card-link" href="https://www.service-public.fr/particuliers/vosdroits/R16026">service-public.fr</a><span class="vote-card-text">)</span></li>
+                <li class="vote-numbered-list-item"><span class="vote-card-text" data-i18n="European Elections:">European Elections:</span>&nbsp;<a class="vote-card-link" target="_blank" href="https://www.formulaires.modernisation.gouv.fr/gf/cerfa_12671.do" title="French Government Forms - Cerfa 12671-02 European Elections">Cerfa 12671-02</a> <span class="vote-card-text" data-i18n="(see">(see</span>&nbsp;<a class="vote-card-link" href="https://www.service-public.fr/particuliers/vosdroits/R16025">service-public.fr</a><span class="vote-card-text">)</span></li>
+                <li class="vote-numbered-list-item"><span class="vote-card-text" data-i18n="Identification - Passport, Identity Card or residence permit">Identification - Passport, Identity Card or residence permit</span></li>
+                <li class="vote-numbered-list-item"><a class="vote-card-link" href="https://absolutely-french.eu/what-is-a-justificatif-de-domicile/?lang=en" data-i18n="Justicatif de Domile">Justicatif de Domile</a>&nbsp;<span class="vote-card-text">-</span>&nbsp;<span class="vote-card-text" data-i18n="a document verifiying your address such as a recent">a document verifiying your address such as a recent</span><a class="vote-card-link" href="resources/example_justicatif-de-domicile.png" target="_blank" data-i18n="electricity bill on your name">electricity bill on your name</a>.&nbsp;<span class="vote-card-text" data-i18n="If the electricity bill">If the electricity bill is on another person's name, you can also use a copy of that person's passport, his electricity bill and a</span>&nbsp;<a class="vote-card-link" href="resources/example_attestation_d_honneur.pdf" target="_blank" data-i18n="declaration of honor">declaration of honor</a>&nbsp;<span class="vote-card-text">, </span><span class="vote-card-text" data-i18n="in which this person states, you are living with her or him.">in which this person states, you are living with her or him.</span></li>
+              </ol>
+              <div class="mdl-card__actions mdl-card--border">
+                <a href="https://www.service-public.fr/particuliers/vosdroits/F1937" title="French online public services - citzen rights - elections" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" data-i18n="More info">More info</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="vote-card mdl-card mdl-shadow--2dp">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text" data-i18n="4. Where can I register?">4. Where can I register?</h2>
+            </div>
+            <div class="mdl-card__supporting-text">  
+              <p class="vote-card-text-last">
+                <span class="vote-card-text" data-i18n="It is possible to do the registration">It is possible to do the registration</span>&nbsp;
+                <a class="vote-card-link" target="_blank" href="https://www.service-public.fr/compte/se-connecter" data-i18n="online">online</a>
+                <span class="vote-card-text">,</span>&nbsp;
+                <span class="vote-card-text" data-i18n="by mail (please only send">by mail (please only send a copy of your passport) or by taking the documents to your local Mairie. Adresses can be searched below:</span>
+              </p>
+              <form name="vote-search-mairie" class="vote-mairie-form">
+                <span class="vote-card-text" data-i18n="Click to search:">Click to search:</span>&nbsp;
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
+                  <label class="mdl-button mdl-js-button mdl-button--icon" for="vote-search-mairie-input">
+                    <i class="material-icons">search</i>
+                  </label>
+                  <div class="mdl-textfield__expandable-holder">
+                    <input class="mdl-textfield__input vote-search-input" pattern=".{3,}" required type="text" name="vote-search-input" id="vote-search-mairie-input">
+                    <label class="mdl-textfield__label" for="vote-search-mairie-input-expandable">Expandable Input</label>
+                  </div>
+                </div>
+              </form>
+              <form name="vote-clear-list" class="vote-clear-form">
+                <button type="submit" class="vote-submit-button mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">delete</i></button>
+              </form>
+              <div class="vote-search-result-wrapper">
+                <ul class="vote-search-results mdl-list"></ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="vote-card mdl-card mdl-shadow--2dp">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text" data-i18n="5. What else can I do?">5. What else can I do?</h2>
+            </div>
+            <div class="mdl-card__supporting-text">  
+              <p class="vote-card-text vote-share-align" data-i18n="Spread the word, so others can register, too:">Spread the word, so others can register, too:</p>
+              <form name="vote-share-facebook" class="vote-share-align">
+                <button type="submit" class="mdl-button vote-share-button">
+                  <i class="fab fa-facebook"></i>
+                </button>
+              </form>
+              <form name="vote-share-twitter" class="vote-share-align">
+                <button type="submit" class="mdl-button vote-share-button">
+                  <i class="fab fa-twitter"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+
+        </div>
+        <div class="vote-footer">
+          <div class="vote-credits">
+            <span class="" data-i18n="© 2019 - Created by">© 2019 - Created by</span>&nbsp;
+            <a class="vote-credits-link" href="https://www.voltfrance.org" title="Volt France | Redonnons confiance en la politique">Volt France</a>
+            <span class="">,</span>&nbsp;
+            <span class="" data-i18n="hosted by">hosted by</span>&nbsp;
+            <a class="vote-credits-link" href="https://github.com/VoltEuropa/VoteFrance">Github</a>
+            <span class="">.</span>&nbsp;
+            <span class="" data-i18n="Icon inspired by">Icon inspired by</span>&nbsp;
+            <a class="vote-credits-link" href="https://thenounproject.com/search/?q=vote&i=52105">Desbenoit</a>&nbsp;
+            <span class="" data-i18n="from">from</span>&nbsp;
+            <a class="vote-credits-link" href="https://nounproject.com/" title="Nounproject">the Nounproject</a>
+            <span class="">.</span>&nbsp;
+            <span class="" data-i18n="Banner image by John Towner from ">Banner image by John Towner from</span>&nbsp;
+            <a class="vote-credits-link" href="https://www.unsplash.com">unsplash.com</a>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div data-gadget-url="gadget_jio.html"
+      data-gadget-scope="vote_jio"
+      data-gadget-sandbox="public">
+    </div>
+    <div data-gadget-url="gadget_jio.html"
+      data-gadget-scope="ods_jio"
+      data-gadget-sandbox="public">
+    </div>
+  
+  </body>
+</html>
+
+
